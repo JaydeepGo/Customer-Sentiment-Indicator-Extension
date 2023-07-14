@@ -1,0 +1,1 @@
+Placedholder for images
