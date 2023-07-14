@@ -24,3 +24,7 @@ On other pages, it will be hidden.
 
 ### Future Enhancements:
 Add the sentiment analysis on recent closed case comments.
+
+### Credits:
+- [jsforce](https://jsforce.github.io/) wrapper to connect with SF API.
+- [Chrome-Salesforce-inspector](https://github.com/sorenkrabbe/Chrome-Salesforce-inspector) inspiration for base structure. 
