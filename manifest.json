@@ -1,0 +1,27 @@
+{
+  "manifest_version": 2,
+  "name": "Customer Sentiment Analysis",
+  "version": "0.1",
+  "description": "This extension is used to show customer sentiment score based on recent survey score",
+  "icons": {
+    "128": "icon.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.force.com/lightning/r/Case/*"],
+      "css": ["analysis-button.css"],
+      "js": ["jsforce.js", "analysis-button.js"]
+    }
+  ],
+  "background": {
+    "scripts": ["jsforce.js", "customer-analysis-background.js"],
+    "persistent": false
+  },
+  "web_accessible_resources": ["images/*"],
+  "permissions": [
+    "https://*.salesforce.com/*",
+    "https://*.force.com/*",
+    "cookies",
+    "tabs"
+  ]
+}

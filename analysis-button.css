@@ -1,0 +1,29 @@
+#sentiment-indicator {
+    z-index: 1000;
+    display: block;
+    position: fixed;
+    top: 92px;
+    right: 0;
+    vertical-align: middle;
+}
+
+#sentiment-indicator .sentiment-btn {
+    box-sizing: border-box;
+    width: 30px;
+    height: 30px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: #fff;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    box-shadow: -2px 0 2px black;
+}
+#sentiment-indicator .sentiment-btn:hover,
+#sentiment-indicator.sentiment-active .sentiment-btn {
+    opacity: 1;
+    width: 35px;
+    height: 35px;
+}
+#sentiment .sentiment-btn img {
+   /* margin: 2px;  */
+}
