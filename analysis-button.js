@@ -23,6 +23,7 @@ chrome.runtime.sendMessage(
             SESSION_ID = sfSessionInfo.key;
             initIndicator();
           } else {
+            updateButton(null, true, location.href);
             console.log("Session null");
           }
         }
@@ -36,15 +37,21 @@ function updateButton(score, isError, analysisURL) {
     return;
   }
   let indicatorElement;
-  let button = document.getElementsByClassName("sentiment-btn");
+  let indicatorElementLast;
+  let button = document.getElementsByClassName("sentiment-btn-avg");
   if (button && button.length) {
     indicatorElement = button[0];
+    indicatorElementLast = document.getElementsByClassName("sentiment-btn-last")[0];
   } else {
     let rootEl = document.createElement("div");
     rootEl.id = "sentiment-indicator";
     indicatorElement = document.createElement("div");
-    indicatorElement.className = "sentiment-btn";
+    indicatorElement.className = "sentiment-btn-avg";
     indicatorElement.tabIndex = 0;
+    indicatorElementLast = document.createElement("div");
+    indicatorElementLast.className = "sentiment-btn-last";
+    indicatorElementLast.tabIndex = 0;
+    indicatorElement.appendChild(indicatorElementLast);
     rootEl.appendChild(indicatorElement);
     document.body.appendChild(rootEl);
   }
@@ -55,25 +62,31 @@ function updateButton(score, isError, analysisURL) {
     indicatorElement.style.backgroundSize = "cover";
     indicatorElement.title =
       "Customer Sentiment Indicator (Something went wrong)";
-  } else if (score > 4) {
-    indicatorElement.style.backgroundColor = "Green";
-    indicatorElement.title = "Customer Sentiment Indicator - Happy Customer";
-  } else if (score > 3) {
-    indicatorElement.style.backgroundColor = "#FFCC00"; //Yellow
-    indicatorElement.title =
-      "Customer Sentiment Indicator - Unsatisfied Customer";
-  } else if (score > 0.99) {
-    indicatorElement.style.backgroundColor = "Red";
-    indicatorElement.title = "Customer Sentiment Indicator - Angry Customer";
   } else {
-    indicatorElement.style.backgroundColor = "Black";
-    indicatorElement.title =
-      "Customer Sentiment Indicator - Not Enough Historial Data";
+    fillColor(score.averageScore, indicatorElement, "Overall Customer Feedback");
+    fillColor(score.latestScore, indicatorElementLast, "Last Customer Feedback");
+  }
+}
+
+function fillColor(score, element, titleStringPrefix) {
+  // Secret Machine learning code
+  if (score == 5) {
+    element.style.backgroundColor = "Green";
+    element.title = titleStringPrefix + " - Happy Customer";
+  } else if (score > 2.99) {
+    element.style.backgroundColor = "#FFCC00"; //Yellow
+    element.title =  titleStringPrefix + " - Unsatisfied Customer";
+  } else if (score > 0.99) {
+    element.style.backgroundColor = "Red";
+    element.title = titleStringPrefix + " - Angry Customer";
+  } else {
+    element.style.backgroundColor = "Black";
+    element.title = titleStringPrefix + " - Not Enough Historical Data";
   }
 }
 
 function clearIndicator() {
-  let button = document.getElementsByClassName("sentiment-btn");
+  let button = document.getElementsByClassName("sentiment-btn-avg");
   if (button && button.length) {
     button[0].remove();
   }
@@ -150,8 +163,12 @@ function getSurveyDetails(contactId, analysisURL) {
           ) / surveyResult.records.length;
         console.log("Customer Sentiment latest Score>>>", latestScore);
         console.log("Customer Sentiment Avg Score>>>", averageScore);
+        let score = {
+          "averageScore" : averageScore,
+          "latestScore" : latestScore
+        }
 
-        updateButton(averageScore, false, analysisURL);
+        updateButton(score, false, analysisURL);
       }
     );
   } catch (err) {
