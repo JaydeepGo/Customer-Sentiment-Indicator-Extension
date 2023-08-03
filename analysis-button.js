@@ -1,7 +1,7 @@
 let SESSION_ID;
 let SF_HOST;
 let CONNECTION;
-console.log("Hii");
+console.log("Hii World");
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   // listen for messages sent from background.js

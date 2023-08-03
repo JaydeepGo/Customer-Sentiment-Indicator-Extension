@@ -8,7 +8,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://*.force.com/lightning/r/Case/*"],
+      "matches": ["https://orgcs.lightning.force.com/lightning/r/Case/*"],
       "css": ["analysis-button.css"],
       "js": ["jsforce.js", "analysis-button.js"]
     }
@@ -20,7 +20,7 @@
   "web_accessible_resources": ["images/*"],
   "permissions": [
     "https://*.salesforce.com/*",
-    "https://*.force.com/*",
+    "https://orgcs.lightning.force.com/*",
     "cookies",
     "tabs"
   ]
