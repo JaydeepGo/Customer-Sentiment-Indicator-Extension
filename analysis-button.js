@@ -178,7 +178,7 @@ function getSurveyDetails(contactId, analysisURL) {
 }
 
 function getCurrentContactId(currentURL) {
-  let myRegexp = /orgcs\.lightning\.force\.com\/lightning\/r\/Contact\/+(\w+)+\/view/gm;
+  let myRegexp = /Contact\/+(\w+)+\/view/gm;
   let ids = myRegexp.exec(currentURL);
   if (ids) {
     return ids[1];
@@ -188,7 +188,7 @@ function getCurrentContactId(currentURL) {
 }
 
 function getCurrentCaseId(currentURL) {
-  let myRegexp = /orgcs\.lightning\.force\.com\/lightning\/r\/Case\/+(\w+)+\/view/gm;
+  let myRegexp = /Case\/+(\w+)+\/view/gm;
   let ids = myRegexp.exec(currentURL);
   if (ids) {
     return ids[1];
