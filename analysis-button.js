@@ -57,7 +57,7 @@ function updateButton(score, isError, analysisURL) {
   }
   if (isError) {
     indicatorElement.style.backgroundColor = "White";
-    let errorImaagePath = chrome.extension.getURL("images/error.png");
+    let errorImaagePath = chrome.runtime.getURL("images/error.png");
     indicatorElement.style.backgroundImage = "url('" + errorImaagePath + "')";
     indicatorElement.style.backgroundSize = "cover";
     indicatorElement.title =
