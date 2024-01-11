@@ -1,7 +1,7 @@
 // This code is modified version of https://github.com/sorenkrabbe/Chrome-Salesforce-inspector
 
 "use strict";
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.message == "getSfHost") {
     chrome.cookies.get(
       { url: request.url, name: "sid", storeId: sender.tab.cookieStoreId },

@@ -1,12 +1,14 @@
 let SESSION_ID;
 let SF_HOST;
 let CONNECTION;
+let SCORE_ARRAY;
 console.log("CSI Session Initiated");
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   // listen for messages sent from background.js
   if (request.message === "URL_CHANGE") {
     console.log(request.url);
+    clearIndicator();
     initIndicator();
   }
 });
@@ -36,25 +38,17 @@ function updateButton(score, isError, analysisURL) {
   if (location.href != analysisURL) {
     return;
   }
-  let indicatorElement;
-  let indicatorElementLast;
-  let button = document.getElementsByClassName("sentiment-btn-avg");
-  if (button && button.length) {
-    indicatorElement = button[0];
-    indicatorElementLast = document.getElementsByClassName("sentiment-btn-last")[0];
-  } else {
-    let rootEl = document.createElement("div");
-    rootEl.id = "sentiment-indicator";
-    indicatorElement = document.createElement("div");
-    indicatorElement.className = "sentiment-btn-avg";
-    indicatorElement.tabIndex = 0;
-    indicatorElementLast = document.createElement("div");
-    indicatorElementLast.className = "sentiment-btn-last";
-    indicatorElementLast.tabIndex = 0;
-    indicatorElement.appendChild(indicatorElementLast);
-    rootEl.appendChild(indicatorElement);
-    document.body.appendChild(rootEl);
-  }
+  SCORE_ARRAY = score;
+
+  let rootEl = document.createElement("div");
+  rootEl.id = "sentiment-indicator";
+  let indicatorElement = document.createElement("div");
+  indicatorElement.className = "sentiment-btn-avg";
+  indicatorElement.tabIndex = 0;
+  document.body.appendChild(rootEl);
+  rootEl.appendChild(indicatorElement);
+  indicatorElement.addEventListener("click", this.createPopUpScreen.bind(this, isError));
+
   if (isError) {
     indicatorElement.style.backgroundColor = "White";
     let errorImaagePath = chrome.runtime.getURL("images/error.png");
@@ -63,6 +57,10 @@ function updateButton(score, isError, analysisURL) {
     indicatorElement.title =
       "Customer Sentiment Indicator (Something went wrong)";
   } else {
+    let indicatorElementLast = document.createElement("div");
+    indicatorElementLast.className = "sentiment-btn-last";
+    indicatorElementLast.tabIndex = 0;
+    indicatorElement.appendChild(indicatorElementLast);
     fillColor(score.averageScore, indicatorElement, "Overall Customer Feedback");
     fillColor(score.latestScore, indicatorElementLast, "Last Customer Feedback");
   }
@@ -75,7 +73,7 @@ function fillColor(score, element, titleStringPrefix) {
     element.title = titleStringPrefix + " - Happy Customer";
   } else if (score > 2.99) {
     element.style.backgroundColor = "#FFCC00"; //Yellow
-    element.title =  titleStringPrefix + " - Unsatisfied Customer";
+    element.title = titleStringPrefix + " - Unsatisfied Customer";
   } else if (score > 0.99) {
     element.style.backgroundColor = "Red";
     element.title = titleStringPrefix + " - Angry Customer";
@@ -90,6 +88,8 @@ function clearIndicator() {
   if (button && button.length) {
     button[0].remove();
   }
+  clearPopUpScreen();
+  SCORE_ARRAY = null;
 }
 
 function initIndicator() {
@@ -120,8 +120,8 @@ function getCaseContactId(caseId, analysisURL) {
   try {
     CONNECTION.query(
       "SELECT Id, CaseNumber, Subject, ContactId  FROM case WHERE id='" +
-        caseId +
-        "' LIMIT 1",
+      caseId +
+      "' LIMIT 1",
       function (err, result) {
         if (err) {
           updateButton(null, true, analysisURL);
@@ -141,9 +141,9 @@ function getCaseContactId(caseId, analysisURL) {
 function getSurveyDetails(contactId, analysisURL) {
   try {
     CONNECTION.query(
-      "SELECT Id, Customer_Effort_Score__c, Technical_Support_Satisfaction_Score__c FROM Survey_Results__c WHERE Contact__c='" +
-        contactId +
-        "' ORDER BY CreatedDate desc LIMIT 5",
+      "SELECT Id, Case__c, Case__r.CaseNumber, Customer_Effort_Score__c, Technical_Support_Satisfaction_Score__c, CreatedDate FROM Survey_Results__c WHERE Contact__c='" +
+      contactId +
+      "' ORDER BY CreatedDate desc LIMIT 5",
       function (err, surveyResult) {
         if (err) {
           updateButton(null, true, analysisURL);
@@ -164,16 +164,82 @@ function getSurveyDetails(contactId, analysisURL) {
         console.log("Customer Sentiment latest Score>>>", latestScore);
         console.log("Customer Sentiment Avg Score>>>", averageScore);
         let score = {
-          "averageScore" : averageScore,
-          "latestScore" : latestScore
+          "averageScore": averageScore,
+          "latestScore": latestScore,
+          "scoreList": surveyResult.records
         }
-
         updateButton(score, false, analysisURL);
       }
     );
   } catch (err) {
     updateButton(null, true, analysisURL);
     console.log("Error>>>", err);
+  }
+}
+
+function createPopUpScreen(error) {
+  clearPopUpScreen(); // Remove old pop-up table. 
+  let tableRoot = document.createElement("div");
+  tableRoot.id = "sentiment-table-pop-up";
+
+  let tableClose = document.createElement("div");
+  tableClose.className = "table-close-btn";
+  tableClose.insertAdjacentHTML('beforeend', '<span class="white-border">[X]</span>');
+
+  tableRoot.appendChild(tableClose);
+  tableClose.addEventListener("click", this.clearPopUpScreen.bind(this));
+
+  let tableData = '';
+  const dateOptions = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  };
+  if (SCORE_ARRAY && SCORE_ARRAY.scoreList && SCORE_ARRAY.scoreList.length) {
+    SCORE_ARRAY.scoreList.forEach((element) =>
+      tableData = tableData + `<tr>
+    <td class="sentiment-table-data">
+    <a href="/${element.Id}" target="_blank">
+    ${new Date(element.CreatedDate).toLocaleString("en-IN", dateOptions)}
+    </a></td>
+    <td class="sentiment-table-data">
+    <a href="/${element.Case__c}" target="_blank">
+    ${element.Case__r.CaseNumber}
+    </a></td>
+    <td class="sentiment-table-data">${element.Technical_Support_Satisfaction_Score__c}</td>
+    <td class="sentiment-table-data">${element.Customer_Effort_Score__c}</td>
+    </tr>`
+    );
+  } else if (error) {
+    tableData = `<tr>
+                  <td class="sentiment-table-data" colspan="4" style="text-align: center;color:red;"><b>Connection Error.</b></td>
+                </tr>`;
+  } else {
+    tableData = `<tr>
+                  <td class="sentiment-table-data" colspan="4" style="text-align: center;"><b>No Data Available for the Contact.</b></td>
+                </tr>`;
+  }
+
+  let tableHtml = `<div class="sentiment-table white-border">
+                  <div class="sentiment-table-heading" >Survey Summary:</div> 
+                  <table class="sentiment-table-data"> 
+                    <tr>
+                      <th class="sentiment-table-data">Date</th>
+                      <th class="sentiment-table-data">Case Number</th>
+                      <th class="sentiment-table-data">Technical Score</th>
+                      <th class="sentiment-table-data">Customer Effort Score</th>
+                    </tr>
+                    ${tableData}
+                  </table>
+                  </div> `;
+  tableRoot.insertAdjacentHTML('beforeend', tableHtml);
+  document.body.appendChild(tableRoot);
+}
+
+function clearPopUpScreen(event) {
+  let tablePopUp = document.getElementById("sentiment-table-pop-up");
+  if (tablePopUp) {
+    tablePopUp.remove();
   }
 }
 

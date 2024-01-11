@@ -2,8 +2,7 @@
     z-index: 1000;
     display: block;
     position: fixed;
-    vertical-align: middle;
-    right: 0;
+    right: 0px;
     top: 75px;
 }
 
@@ -28,14 +27,33 @@
     border-color: white;
 }
 
-/*
-#sentiment-indicator .sentiment-btn:hover,
-#sentiment-indicator.sentiment-active .sentiment-btn {
-    opacity: 1;
-    width: 35px;
-    height: 35px;
+#sentiment-table-pop-up {
+    z-index: 1004;
+    display: block;
+    position: fixed;
+    top: 75px;
+    right: 42px;
 }
-#sentiment .sentiment-btn img {
-    margin: 2px;
+
+.white-border {
+    background-color: white;
 }
- */
+
+.sentiment-table-heading {
+    font-size: 1.5em;
+    font-weight: bold;
+    padding: 10px 10px 10px 2px
+}
+
+table[class="sentiment-table-data"],
+th[class="sentiment-table-data"],
+td[class="sentiment-table-data"] {
+    border: 2px solid black;
+    padding: 5px;
+}
+
+.table-close-btn {
+    cursor: pointer;
+    color: red;
+    background-color: transparent;
+}
