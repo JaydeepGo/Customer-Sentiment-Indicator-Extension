@@ -61,8 +61,8 @@ function updateButton(score, isError, analysisURL) {
     indicatorElementLast.className = "sentiment-btn-last";
     indicatorElementLast.tabIndex = 0;
     indicatorElement.appendChild(indicatorElementLast);
-    fillColor(score.averageScore, indicatorElement, "Overall Customer Feedback");
-    fillColor(score.latestScore, indicatorElementLast, "Last Customer Feedback");
+    fillColor(score.averageScore, indicatorElement, "Overall Customer Sentiment");
+    fillColor(score.latestScore, indicatorElementLast, "Last Customer Sentiment");
   }
 }
 
@@ -70,13 +70,13 @@ function fillColor(score, element, titleStringPrefix) {
   // Secret Machine learning code
   if (score == 5) {
     element.style.backgroundColor = "Green";
-    element.title = titleStringPrefix + " - Happy Customer";
+    element.title = titleStringPrefix + " - Very Satisfied";
   } else if (score > 2.99) {
     element.style.backgroundColor = "#FFCC00"; //Yellow
-    element.title = titleStringPrefix + " - Unsatisfied Customer";
+    element.title = titleStringPrefix + " - Satisfied";
   } else if (score > 0.99) {
     element.style.backgroundColor = "Red";
-    element.title = titleStringPrefix + " - Angry Customer";
+    element.title = titleStringPrefix + " - Not at All Satisfied";
   } else {
     element.style.backgroundColor = "Black";
     element.title = titleStringPrefix + " - Not Enough Historical Data";
