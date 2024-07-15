@@ -49,7 +49,8 @@ async function updateButton(score, isError, analysisURL) {
     indicatorElement.style.backgroundColor = "White";
     let errorImaagePath = chrome.runtime.getURL("images/error.png");
     indicatorElement.style.backgroundImage = "url('" + errorImaagePath + "')";
-    indicatorElement.style.backgroundSize = "cover";
+    indicatorElement.style.backgroundSize = "contain";
+    indicatorElement.style.backgroundRepeat = "no-repeat";
     indicatorElement.title =
       "Customer Sentiment Indicator (Something went wrong)";
   } else {
