@@ -2,41 +2,10 @@
 
 "use strict";
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-  if (request.message == "getSfHost") {
-    chrome.cookies.get(
-      { url: request.url, name: "sid", storeId: sender.tab.cookieStoreId },
-      (cookie) => {
-        if (!cookie) {
-          sendResponse(null);
-          return;
-        }
-        let [orgId] = cookie.value.split("!");
-        chrome.cookies.getAll(
-          {
-            name: "sid",
-            domain: "salesforce.com",
-            secure: true,
-            storeId: sender.tab.cookieStoreId
-          },
-          (cookies) => {
-            let sessionCookie = cookies.find((c) =>
-              c.value.startsWith(orgId + "!")
-            );
-            if (sessionCookie) {
-              sendResponse(sessionCookie.domain);
-            } else {
-              sendResponse(null);
-            }
-          }
-        );
-      }
-    );
-    return true; // Tell Chrome that we want to call sendResponse asynchronously.
-  }
   if (request.message == "getSession") {
     chrome.cookies.get(
       {
-        url: "https://" + request.sfHost,
+        url: request.url,
         name: "sid",
         storeId: sender.tab.cookieStoreId
       },
@@ -52,9 +21,8 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         sendResponse(session);
       }
     );
-    return true; // Tell Chrome that we want to call sendResponse asynchronously.
   }
-  return false;
+  return true; // Tell Chrome that we want to call sendResponse asynchronously.
 });
 
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {

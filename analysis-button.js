@@ -1,5 +1,5 @@
 let SESSION_ID;
-let SF_HOST;
+let SF_HOST = "https://orgcs.my.salesforce.com";
 let CONNECTION;
 let SCORE_ARRAY;
 console.log("CSI Session Initiated");
@@ -8,21 +8,19 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   // listen for messages sent from background.js
   if (request.message === "URL_CHANGE") {
     console.log(request.url);
-    clearIndicator();
-    initIndicator();
+    clearIndicator().then(
+      initIndicator()
+    );
   }
 });
 
+
 chrome.runtime.sendMessage(
-  { message: "getSfHost", url: location.href },
-  (sfHost) => {
-    if (sfHost) {
-      chrome.runtime.sendMessage(
-        { message: "getSession", sfHost },
+  { message: "getSession", url: SF_HOST },
         (sfSessionInfo) => {
           if (sfSessionInfo) {
-            SF_HOST = "https://" + sfSessionInfo.hostname;
             SESSION_ID = sfSessionInfo.key;
+      setConnection();
             initIndicator();
           } else {
             updateButton(null, true, location.href);
@@ -30,11 +28,9 @@ chrome.runtime.sendMessage(
           }
         }
       );
-    }
-  }
-);
 
-function updateButton(score, isError, analysisURL) {
+
+async function updateButton(score, isError, analysisURL) {
   if (location.href != analysisURL) {
     return;
   }
