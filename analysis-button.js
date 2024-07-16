@@ -223,6 +223,8 @@ async function createPopUpScreen(error) {
 
   let button = document.getElementById("sentiment-indicator");
   button.appendChild(popUp);
+  // These event listeners are only enabled when the popup is active to avoid interfering with Salesforce when not using the inspector
+  addEventListener("click", outsidePopupClick);
 }
 
 function generateSurveyTable(tableRecordData) {
@@ -334,6 +336,7 @@ function clearPopUpScreen(event) {
   let tablePopUp = document.getElementById("sentiment-table-pop-up");
   if (tablePopUp) {
     tablePopUp.remove();
+    removeEventListener("click", outsidePopupClick);
   }
 }
 
@@ -354,5 +357,13 @@ function getCurrentCaseId(currentURL) {
     return ids[1];
   } else {
     return null;
+  }
+}
+
+function outsidePopupClick(e) {
+  let button = document.getElementById("sentiment-indicator");
+  // Close the popup when clicking outside it
+  if (button && !button.contains(e.target)) {
+    clearPopUpScreen();
   }
 }
