@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Customer Sentiment Analysis",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "This extension is used to show customer sentiment score based on recent survey score",
   "icons": {
     "128": "icon.png"

@@ -10,7 +10,7 @@
     box-sizing: border-box;
     width: 40px;
     height: 40px;
-    border-width: 4px;
+    border-width: 5px;
     border-style: solid;
     border-color: #fff;
     border-top-left-radius: 5px;
@@ -25,6 +25,18 @@
     border-width: 1px;
     border-style: solid;
     border-color: white;
+}
+
+#sentiment-indicator .sentiment-btn-escalation {
+    width: 15px;
+    height: 15px;
+    z-index: 1002;
+    border-width: 1px;
+    border-style: solid;
+    border-color: white;
+    position: relative;
+    left: 15px;
+    top: -15px;
 }
 
 #sentiment-table-pop-up {
@@ -56,4 +68,10 @@ td[class="sentiment-table-data"] {
     cursor: pointer;
     color: red;
     background-color: transparent;
+}
+
+.table-root {
+    background-color: white;
+    padding: 4px;
+    border-style: groove;
 }
