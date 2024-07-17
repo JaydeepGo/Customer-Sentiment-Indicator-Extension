@@ -76,7 +76,7 @@ function fillColor(score, element, titleStringPrefix) {
   if (score == 5) {
     element.style.backgroundColor = "Green";
     element.title = titleStringPrefix + " - Very Satisfied";
-  } else if (score > 2.99) {
+  } else if (score > 3) {
     element.style.backgroundColor = "#FFCC00"; //Yellow
     element.title = titleStringPrefix + " - Satisfied";
   } else if (score > 0.01) {
