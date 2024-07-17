@@ -23,7 +23,7 @@ chrome.runtime.sendMessage(
       initIndicator();
     } else {
       updateButton(null, true, location.href);
-      console.log("Session null");
+      console.error("Session null");
     }
   }
 );
@@ -132,7 +132,7 @@ async function getCaseContactId(caseId, analysisURL) {
     );
   } catch (err) {
     updateButton(null, true, analysisURL);
-    console.log("CSI Error>>>", err);
+    console.error("CSI Error>>>", err);
   }
 }
 
@@ -175,8 +175,6 @@ async function getSurveyDetails(contactId, analysisURL) {
       }
     });
     let averageAge = totalAge / caseResult.records.length;
-   // console.log("Customer Sentiment latest Score>>>", latestScore);
-   // console.log("Customer Sentiment Avg Score>>>", averageScore);
     let score = {
       "averageScore": averageScore,
       "latestScore": latestScore,
@@ -190,7 +188,7 @@ async function getSurveyDetails(contactId, analysisURL) {
   })
     .catch((err) => {
       updateButton(null, true, analysisURL);
-      console.log("CSI Error>>>", err);
+      console.error("CSI Error>>>", err);
     });
 }
 
