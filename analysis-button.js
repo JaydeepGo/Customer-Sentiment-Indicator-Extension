@@ -57,8 +57,8 @@ async function updateButton(score, isError, analysisURL) {
     indicatorElementLast.className = "sentiment-btn-last";
     indicatorElementLast.tabIndex = 0;
     indicatorElement.appendChild(indicatorElementLast);
-    fillColor(score.averageScore, indicatorElement, "Overall Customer Sentiment");
-    fillColor(score.latestScore, indicatorElementLast, "Last Customer Sentiment");
+    fillColor(score.averageScore, indicatorElement, "Overall Customer Survey");
+    fillColor(score.latestScore, indicatorElementLast, "Last Customer Survey");
 
     if (score.escalationInfo && score.escalationInfo.length) {
       let indicatorElementLast = document.createElement("div");
@@ -142,27 +142,30 @@ async function getSurveyDetails(contactId, analysisURL) {
     contactId +
     "' ORDER BY CreatedDate desc LIMIT 5");
   let caseQuery = CONNECTION.query(
-    "Select Id, CaseNumber, Management_Escalation_Count__c, Escalation_Comments__c, Age_days__c, CreatedDate from case where ContactId='" +
+    "Select Id, CaseNumber, Management_Escalation_Count__c, Age_days__c, CreatedDate from case where ContactId='" +
     contactId +
     "' ORDER BY CreatedDate desc LIMIT 10");
   Promise.all([surveyQuery, caseQuery]).then((values) => {
-   // console.log("Data>>>", values);
-
     let surveyResult = values[0];
     let caseResult = values[1];
-
-   // console.log("Survey result.records>>>", JSON.stringify(surveyResult));
+  
     let latestScore;
     if (surveyResult.records && surveyResult.records[0]) {
       latestScore =
         surveyResult.records[0].Technical_Support_Satisfaction_Score__c;
     }
-    let averageScore =
-      surveyResult.records.reduce(
-        (total, next) =>
-          total + next.Technical_Support_Satisfaction_Score__c,
-        0
-      ) / surveyResult.records.length;
+
+    let surveyCount = surveyResult.records.length;
+    let totalSurveyScore =0;
+    surveyResult.records.forEach((element) => {
+      if (element.Technical_Support_Satisfaction_Score__c) {
+        totalSurveyScore = totalSurveyScore + element.Technical_Support_Satisfaction_Score__c
+      } else {
+        surveyCount = surveyCount-1; 
+      }
+    });
+    let averageScore = totalSurveyScore/surveyCount;
+    
     let totalAge = 0;
     let totalEscalations = 0;
     let escalationInfo = [];
@@ -243,8 +246,8 @@ function generateSurveyTable(tableRecordData) {
     <a href="/${element.Case__c}" target="_blank">
     ${element.Case__r.CaseNumber}
     </a></td>
-    <td class="sentiment-table-data">${element.Technical_Support_Satisfaction_Score__c}</td>
-    <td class="sentiment-table-data">${element.Customer_Effort_Score__c}</td>
+    <td class="sentiment-table-data">${element.Technical_Support_Satisfaction_Score__c? element.Technical_Support_Satisfaction_Score__c: '-'}</td>
+    <td class="sentiment-table-data">${element.Customer_Effort_Score__c? element.Customer_Effort_Score__c: '-'}</td>
     </tr>`
     );
   } else {
@@ -275,24 +278,20 @@ function generateCustomerInfoTable(tableRecordData, error) {
                   <td class="sentiment-table-data" colspan="3" style="text-align: center;color:red;"><b>Connection Error, Please try again. For more info check console logs.</b></td>
                 </tr>`;
   } else if (tableRecordData) {
-    let avgCSAT = tableRecordData.averageScore;
-    if (!tableRecordData.averageScore) {
-      avgCSAT = 0;
-    }
     tableData = `<tr>
-    <td class="sentiment-table-data" title="Customer Avg CSAT based on last 5 CSAT">${avgCSAT.toFixed(2)}</td>
-    <td class="sentiment-table-data" title="Customer Escalation in last 10 cases">${tableRecordData.totalEscalations}/${tableRecordData.totalCases}</td>
-    <td class="sentiment-table-data" title="Customer TTR in last 10 cases">${tableRecordData.averageAge.toFixed(2)}</td>
+    <td class="sentiment-table-data" title="Customer Avg CSAT based on last 5 surveys.">${tableRecordData.averageScore? tableRecordData.averageScore.toFixed(2): '-'}</td>
+    <td class="sentiment-table-data" title="Customer Escalations in last ${tableRecordData.totalCases} cases(Max 10).">${tableRecordData.totalEscalations}/${tableRecordData.totalCases}</td>
+    <td class="sentiment-table-data" title="Customer TTR based on last ${tableRecordData.totalCases} cases(Max 10).">${tableRecordData.averageAge.toFixed(2)}</td>
     </tr>`;
   }
 
   return `<div class="sentiment-table white-border">
-                  <div class="sentiment-table-heading" >CSI Summary:</div> 
+                  <div class="sentiment-table-heading" >Customer Sentiment Summary:</div> 
                   <table class="sentiment-table-data"> 
                     <tr>
-                      <th class="sentiment-table-data" title="Customer Avg CSAT based on last 5 CSAT">CSAT</th>
-                      <th class="sentiment-table-data" title="Customer Escalations in last 10 cases">Escalation</th>
-                      <th class="sentiment-table-data" title="Customer TTR in last 10 cases">TTR</th>
+                      <th class="sentiment-table-data" title="Customer Avg CSAT based on last 5 surveys.">CSAT</th>
+                      <th class="sentiment-table-data" title="Customer Escalations in last ${tableRecordData?tableRecordData.totalCases: 'n'} cases(Max 10).">Escalation</th>
+                      <th class="sentiment-table-data" title="Customer TTR based on last ${tableRecordData?tableRecordData.totalCases: 'n'} cases(Max 10).">TTR</th>
                     </tr>
                     ${tableData}
                   </table>
